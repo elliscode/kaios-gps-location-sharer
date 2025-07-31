@@ -1,0 +1,27 @@
+{
+    "id": "GPS-Location-Sharer",
+    "name": "GPS Location Sharer",
+    "short_name": "GPS Sharer",
+    "description": "Share your GPS location with friends and family",
+    "lang": "en-US",
+    "theme_color": "#ffffff",
+    "orientation": "natural",
+    "start_url": "/index.html",
+    "icons": [
+        {
+            "src": "/assets/icons/kaios_56.png",
+            "type": "image/png",
+            "sizes": "56x56"
+        },
+        {
+            "src": "/assets/icons/kaios_112.png",
+            "type": "image/png",
+            "sizes": "112x112"
+        }
+    ],
+    "b2g_features": {
+        "type": "web",
+        "permissions": {},
+        "version": "1.0.0"
+    }
+}

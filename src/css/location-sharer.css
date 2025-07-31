@@ -1,0 +1,74 @@
+button {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 3px 10px;
+  margin: 2.5px 10px;
+  border-radius: 18px;
+  border: 2px solid #555;
+  font-weight: bold;
+}
+
+button:focus {
+  background-color: #820099;
+  border-color: #820099;
+  color: white;
+}
+
+button[nav-selectable="false"] {
+  background-color: #999;
+  color: #555;
+}
+
+.info {
+  display: flex;
+  background-color: white;
+  flex-direction: row;
+  padding: 5px 10px;
+  margin: 2.5px 10px;
+  border-radius: 18px;
+  align-items:center;
+  overflow:hidden;
+}
+
+.info span:first-child {
+  color: #555;
+  font-size: medium;
+  margin-right: 5px;
+
+}
+
+.info span:last-child {
+  color: black;
+  font-size: large;
+  flex-grow: 1;
+}
+
+.info span:last-child::after {
+  content: "\00a0";
+}
+
+.dialog-bg {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  background-color: #5555557c;
+}
+
+.dialog {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: 3;
+  background-color: white;
+}
+
+.dialog .title {
+  background-color: #820099;
+}

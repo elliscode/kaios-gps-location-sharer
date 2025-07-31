@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="rgb(106, 0, 128)" />
+    <title>GPS Location Sharer</title>
+    <link rel="stylesheet" type="text/css" href="/src/css/header.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/input.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/softkey.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/location-sharer.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/root.css" />
+</head>
+
+<body>
+    <div id="root">
+        <header>
+            <span>GPS Location Sharer</span>
+        </header>
+
+        <button nav-selectable="true" id="toggle">Enable Location</button>
+        <div class="flex row">
+            <div class="info"><span>Latitude:</span><span id="lat"></span></div>
+            <div class="info"><span>Longitude:</span><span id="lon"></span></div>
+        </div>
+        <button nav-selectable="false" id="sms-live">SMS Live Location Updates</button>
+        <button nav-selectable="false" id="sms-maps">SMS Google Maps Link</button>
+        <button nav-selectable="true" id="help">Help</button>
+
+        <div id="softkey">
+            <label id="left"></label>
+            <label id="center">SELECT</label>
+            <label id="right">Options</label>
+        </div>
+    </div>
+    <script type="text/javascript" src="./src/index.js"></script>
+</body>
+
+</html>
