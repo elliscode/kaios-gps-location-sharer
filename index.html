@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="/src/css/softkey.css" />
     <link rel="stylesheet" type="text/css" href="/src/css/location-sharer.css" />
     <link rel="stylesheet" type="text/css" href="/src/css/root.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/help.css" />
 </head>
 
 <body>
@@ -33,12 +34,25 @@
             <header>
                 <span>Help</span>
             </header>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eros dui, vestibulum non neque non, sagittis egestas lectus. Integer et placerat sem, eget hendrerit ante. Proin ac nunc arcu. Cras varius eget lorem eu vestibulum. Phasellus convallis pulvinar massa, a tincidunt tellus suscipit non. Vestibulum rhoncus tincidunt lobortis. Suspendisse dignissim convallis neque quis fermentum. Phasellus rutrum blandit blandit. Mauris viverra, neque sed tempus tempor, massa turpis porttitor magna, sit amet aliquet purus erat in ipsum. Curabitur nibh velit, laoreet ac arcu sed, vulputate mollis velit. In eget dolor quis nulla ultrices feugiat at nec quam. Nam blandit ante et nulla scelerisque varius. In egestas consequat nulla, vitae semper mauris auctor at. Donec quis ornare est.</p>
-<p>Aenean consequat varius dignissim. Cras rutrum neque diam, quis bibendum nunc consequat quis. Mauris pretium dui non enim pretium, vitae sollicitudin sem sodales. Praesent in metus elit. Sed ornare dignissim pellentesque. Proin et aliquam nisi, a ultrices felis. Donec iaculis nibh erat, vel accumsan felis porta a. Donec porttitor arcu vitae ex feugiat faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam faucibus quam nec rhoncus ultricies. Nunc cursus cursus magna ac viverra. Phasellus et dui ac diam sagittis feugiat sed porta lacus. Proin porttitor tempor lectus, vitae ultrices sapien faucibus ac. Proin aliquam metus et arcu lacinia, ut tempor dolor commodo.</p>
-<p>Duis porta justo orci, sit amet vehicula ligula sodales at. Vivamus dapibus erat vitae euismod suscipit. Ut tempor justo id pharetra mattis. Vestibulum porta sodales dolor eget posuere. Sed vulputate eget massa ut maximus. Nullam placerat nisl eu felis gravida vulputate. In ligula risus, dignissim at bibendum a, porttitor nec ante. Fusce gravida rhoncus eros, nec placerat dui malesuada quis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed et nunc non nulla condimentum facilisis ut eget libero. Vivamus pretium a velit a facilisis. Pellentesque hendrerit augue et nisl posuere, sit amet lacinia nunc vestibulum. Vestibulum commodo nec urna luctus scelerisque.</p>
-<p>Morbi sodales sapien eu mauris egestas, eget pretium ex posuere. Proin quis nulla elit. Cras sagittis volutpat justo id dignissim. Mauris imperdiet a arcu in sollicitudin. Ut vitae enim eget quam malesuada molestie vitae quis odio. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur ut laoreet arcu.</p>
-<p>Proin finibus, orci et fringilla gravida, lectus mi ultricies enim, in tincidunt quam erat non massa. In hac habitasse platea dictumst. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam in libero vitae eros mollis fringilla ut sit amet est. Fusce interdum posuere nulla. Sed in quam ac nibh luctus tristique. Duis placerat luctus quam non malesuada. </p>
-        </div>
+            <h3>How do I share my location?</h3>
+            <p>Simply press the "Share Location Data" button in the app. Then, press the "SMS Live Location Updates" button to share the link with your unique identifier.</p>
+            <h3>Do I need to make an account?</h3>
+            <p>No, when you first open the app, it generates a random identifier which is used for location sharing. You can change this unique identifier at any time by pressing "Generate new ID" in the "Options" menu.</p>
+            <h3>Who can see my location?</h3>
+            <p>Anyone with the link can see your location data.</p>
+            <h3>Where is my location data sent?</h3>
+            <p>Your location data is securely sent to our database hosted in the AWS cloud.</p>
+            <h3>How long is my location data kept?</h3>
+            <p>Your location is kept in our database for 1 hour, after that it is automatically deleted from our database.</p>
+            <h3>What other data do you collect?</h3>
+            <p>We store the IP address the request came from, the random identifier which sent the request, and some other headers provided by AWS API Gateway. We <strong>do not</strong> store the location data in our logs. Our logs are kept for 2 years before being deleted.</p>
+            <h3>Do you sell my data?</h3>
+            <p>We do not sell your data, nor will we ever sell your data. This is a hobby project and we will simply shut down the service if it starts costing too much money.</p>
+            <h3>How often is my location updated?</h3>
+            <p>Your location data is sent to our servers every 5 seconds.</p>
+            <h3>What if the person I'm sharing with has a different kind of phone?</h3>
+            <p>Our location viewer page opens in a web browser, and works on both KaiOS devices as well as traditional smartphones, such as those running iOS or Android.</p>
+       </div>
         <div class="panel" id="settings-ui" active="false">
 
         </div>
