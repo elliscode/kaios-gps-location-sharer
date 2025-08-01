@@ -61,8 +61,10 @@ button[nav-selectable="false"] {
 }
 
 .dialog {
+  display:flex;
+  flex-direction:column;
   position: fixed;
-  bottom: 0px;
+  bottom: 30px;
   left: 0px;
   width: 100%;
   z-index: 3;
@@ -71,4 +73,10 @@ button[nav-selectable="false"] {
 
 .dialog .title {
   background-color: #820099;
+  color: white;
+  font-weight: bold;
+  padding: 2px 5px;
+}
+.dialog .body {
+  padding: 2px 5px;
 }

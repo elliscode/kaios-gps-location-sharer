@@ -4,7 +4,7 @@
     "short_name": "GPS Sharer",
     "description": "Share your GPS location with friends and family",
     "lang": "en-US",
-    "theme_color": "#ffffff",
+    "theme_color": "#f5bcff",
     "orientation": "natural",
     "start_url": "/index.html",
     "icons": [

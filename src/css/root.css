@@ -11,5 +11,17 @@ body,
   flex-direction: column;
   overflow: hidden;
   background-color: #E1E2E1 !important;
+}
+
+.panel {
+  flex-direction:column;
   padding-bottom: 30px;
+}
+
+.panel[active="true"] {
+  display:flex;
+}
+
+.panel[active="false"] {
+  display:none;
 }

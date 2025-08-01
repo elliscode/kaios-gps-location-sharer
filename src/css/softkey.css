@@ -15,6 +15,7 @@
   margin-top: auto;
   position: fixed;
   bottom: 0;
+  z-index: 4;
 }
 
 #left,
