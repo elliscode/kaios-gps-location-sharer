@@ -21,7 +21,9 @@
     ],
     "b2g_features": {
         "type": "web",
-        "permissions": {},
+        "permissions": {
+            "geolocation": ""
+        },
         "version": "1.0.0"
     }
 }

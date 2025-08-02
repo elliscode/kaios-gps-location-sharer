@@ -27,7 +27,7 @@
                 <div class="info"><span>Longitude:</span><span id="lon"></span></div>
             </div>
             <button nav-selectable="false" id="sms-live">SMS Live Location Updates</button>
-            <button nav-selectable="false" id="sms-maps">SMS Google Maps Link</button>
+            <!-- <button nav-selectable="false" id="sms-maps">SMS Google Maps Link</button> -->
             <button nav-selectable="true" id="help">Help</button>
         </div>
         <div class="panel" id="help-ui" active="false">
@@ -37,7 +37,7 @@
             <h3>How do I share my location?</h3>
             <p>Simply press the "Share Location Data" button in the app. Then, press the "SMS Live Location Updates" button to share the link with your unique identifier.</p>
             <h3>Do I need to make an account?</h3>
-            <p>No, when you first open the app, it generates a random identifier which is used for location sharing. You can change this unique identifier at any time by pressing "Generate new ID" in the "Options" menu.</p>
+            <p>No, when you first open the app, it generates a unique identifier which is used for location sharing. You can change this unique identifier at any time by pressing "Generate New ID" in the "Options" menu.</p>
             <h3>Who can see my location?</h3>
             <p>Anyone with the link can see your location data.</p>
             <h3>Where is my location data sent?</h3>
@@ -54,7 +54,12 @@
             <p>Our location viewer page opens in a web browser, and works on both KaiOS devices as well as traditional smartphones, such as those running iOS or Android.</p>
        </div>
         <div class="panel" id="settings-ui" active="false">
-
+            <header>
+                <span>Options</span>
+            </header>
+            <div class="info"><span>ID:</span><span id="unique-id"></span></div>
+            <button nav-selectable="true" id="new-id">Generate New ID</button>
+            <button nav-selectable="true" id="settings-exit">Back</button>
         </div>
         <div id="softkey">
             <label id="left"></label>
