@@ -12,7 +12,7 @@
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
-const API_DOMAIN = 'https://api.dumbphoneapps.com';
+const API_DOMAIN = 'https://gps.dumbphoneapps.com';
 const toggleElement = document.getElementById('toggle');
 const mainUi = document.getElementById('main-ui');
 const helpUi = document.getElementById('help-ui');
@@ -150,7 +150,7 @@ function controlsListener(event) {
   }
 }
 function reportPosition(event) {
-  let url = API_DOMAIN + "/one-offs/share-location";
+  let url = API_DOMAIN + "/share";
   let xmlHttp = new XMLHttpRequest();
   xmlHttp.open("POST", url, true);
   xmlHttp.onload = handleShare;
