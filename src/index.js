@@ -1,15 +1,15 @@
-// kaios simulator testing
-let mockDelayCounter = 0;
-function mockMethod(thisFunction) {
-  if (mockDelayCounter++ > 10) {
-    thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
-  }
-}
-navigator.geolocation.watchPosition = function (success, failure, options) {
-  mockDelayCounter = 0;
-  return setInterval(mockMethod, 500, success);
-};
-navigator.geolocation.clearWatch = function (x) { clearInterval(x); }
+// // kaios simulator testing
+// let mockDelayCounter = 0;
+// function mockMethod(thisFunction) {
+//   if (mockDelayCounter++ > 10) {
+//     thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
+//   }
+// }
+// navigator.geolocation.watchPosition = function (success, failure, options) {
+//   mockDelayCounter = 0;
+//   return setInterval(mockMethod, 500, success);
+// };
+// navigator.geolocation.clearWatch = function (x) { clearInterval(x); }
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
@@ -314,29 +314,38 @@ function displayAd() {
   getKaiAd({
     publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
     app: 'gpslocationsharer',
-    slot: 'fullscreenad',
+    slot: 'topbarad',
+
+    h: 60,
+    w: 240,
+
+    // Max supported size is 240x264
+    // container is required for responsive ads
+    container: document.getElementById('ad-container'),
     onerror: function (err) {
       showDialog('Ad Display Error', 'Could not display ad');
     },
     onready: function (ad) {
-      // user clicked the ad
-      ad.on("click", function () {
-        open_options();
-      });
-
-      // user closed the ad (currently only with fullscreen)
-      ad.on("close", function () { console.log("close event"); });
-
-      // the ad succesfully displayed
-      ad.on("display", () => console.log("display event"));
 
       // Ad is ready to be displayed
       // calling 'display' will display the ad
-      ad.call("display", {
-        navClass: "item",
-        tabindex: 9,
-        display: "block",
-      });
+      ad.call('display', {
+
+        // In KaiOS the app developer is responsible
+        // for user navigation, and can provide
+        // navigational className and/or a tabindex
+        tabindex: -1,
+
+        // if the application is using
+        // a classname to navigate
+        // this classname will be applied
+        // to the container
+        navClass: 'nav-selectable',
+
+        // display style will be applied
+        // to the container block or inline-block
+        display: 'block',
+      })
     }
   });
 }
