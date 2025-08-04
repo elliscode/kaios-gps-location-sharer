@@ -1,14 +1,15 @@
-// // kaios simulator testing
-// function mockMethod(thisFunction) {
-//   thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
-// }
-// const navigator = {
-//   geolocation: {
-//     watchPosition: function (success, failure, options) {
-//       return setInterval(mockMethod, 500, success);
-//     }, clearWatch: function (x) { clearInterval(x); }
-//   }
-// }
+// kaios simulator testing
+let mockDelayCounter = 0;
+function mockMethod(thisFunction) {
+  if (mockDelayCounter++ > 10) {
+    thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
+  }
+}
+navigator.geolocation.watchPosition = function (success, failure, options) {
+  mockDelayCounter = 0;
+  return setInterval(mockMethod, 500, success);
+};
+navigator.geolocation.clearWatch = function (x) { clearInterval(x); }
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
@@ -18,12 +19,11 @@ const mainUi = document.getElementById('main-ui');
 const helpUi = document.getElementById('help-ui');
 const settingsUi = document.getElementById('settings-ui');
 const helpElement = document.getElementById('help');
-const lonElement = document.getElementById('lon');
-const latElement = document.getElementById('lat');
+const coordsElement = document.getElementById('coords');
 const uniqueIdElement = document.getElementById('unique-id');
 const newIdElement = document.getElementById('new-id');
 const smsLiveElement = document.getElementById('sms-live');
-// const smsMapsElement = document.getElementById('sms-maps');
+const smsMapsElement = document.getElementById('sms-maps');
 const leftElement = document.getElementById('left');
 const centerElement = document.getElementById('center');
 const rightElement = document.getElementById('right');
@@ -178,22 +178,27 @@ function toggleButtonCallback(event) {
       clearInterval(sendToServerId.pop());
     }
     smsLiveElement.setAttribute('nav-selectable', 'false');
-    // smsMapsElement.setAttribute('nav-selectable', 'false');
-    latElement.innerText = '';
-    lonElement.innerText = '';
+    smsMapsElement.setAttribute('nav-selectable', 'false');
+    coordsElement.innerText = '';
   } else {
     watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
-    sendToServerId.push(setInterval(reportPosition, 5000))
+    toggleElement.setAttribute('nav-selectable', 'false');
+    toggleElement.blur();
+    coordsElement.innerText = 'Getting location, please wait...';
   }
 }
 function showPosition(position) {
+  if (sendToServerId.length <= 0) {
+    sendToServerId.push(setInterval(reportPosition, 5000));
+    smsLiveElement.focus();
+  }
   toggleElement.innerText = 'Stop Sharing Location';
+  toggleElement.setAttribute('nav-selectable', 'true');
   smsLiveElement.setAttribute('nav-selectable', 'true');
-  // smsMapsElement.setAttribute('nav-selectable', 'true');
+  smsMapsElement.setAttribute('nav-selectable', 'true');
   lat = position.coords.latitude;
   lon = position.coords.longitude;
-  latElement.innerText = lat;
-  lonElement.innerText = lon;
+  coordsElement.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
 function displayError() {
   showDialog('Geolocation Error', 'Could not fetch device location, ensure Location Services are enabled in Settings');
@@ -203,10 +208,10 @@ function displayError() {
   while (sendToServerId.length > 0) {
     clearInterval(sendToServerId.pop());
   }
+  toggleElement.setAttribute('nav-selectable', 'true');
   smsLiveElement.setAttribute('nav-selectable', 'false');
-  // smsMapsElement.setAttribute('nav-selectable', 'false');
-  latElement.innerText = '';
-  lonElement.innerText = '';
+  smsMapsElement.setAttribute('nav-selectable', 'false');
+  coordsElement.innerText = '';
 }
 function closeDialogs() {
   while (dialogs.length > 0) {
@@ -292,7 +297,7 @@ uniqueId = getUniqueId();
 document.addEventListener("keydown", controlsListener);
 document.addEventListener("keyup", controlsListener);
 smsLiveElement.addEventListener("click", sendLiveLinkSms);
-// smsMapsElement.addEventListener("click", sendMapsLinkSms);
+smsMapsElement.addEventListener("click", sendMapsLinkSms);
 toggleElement.addEventListener("click", toggleButtonCallback);
 helpElement.addEventListener("click", showHelp);
 newIdElement.addEventListener("click", generateNewIdUi);
@@ -306,52 +311,36 @@ settingsExitElement.addEventListener("click", function (event) {
   firstElement.focus();
 }
 function displayAd() {
-    getKaiAd({
-      publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
-      app: 'gpslocationsharer',
-      slot: 'containerad',
-      w: 240,
-      h: 60,
-	    container: document.getElementById('ad-container'),
-      onerror: function (err) {
-        showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
-      },
-      onready: function (ad) {
-        ad.call('display')
-      }
-    });
-  }
-document.addEventListener("DOMContentLoaded", function () {
-<<<<<<< Updated upstream
-  adsIntervals.push(setInterval(displayAd, 60 * 1000));
-=======
   getKaiAd({
     publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
     app: 'gpslocationsharer',
     slot: 'fullscreenad',
     onerror: function (err) {
-      showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
+      showDialog('Ad Display Error', 'Could not display ad');
     },
     onready: function (ad) {
-        // user clicked the ad
-        ad.on("click", function () {
-          open_options();
-        });
+      // user clicked the ad
+      ad.on("click", function () {
+        open_options();
+      });
 
-        // user closed the ad (currently only with fullscreen)
-        ad.on("close", function () { console.log("close event"); });
+      // user closed the ad (currently only with fullscreen)
+      ad.on("close", function () { console.log("close event"); });
 
-        // the ad succesfully displayed
-        ad.on("display", () => console.log("display event"));
+      // the ad succesfully displayed
+      ad.on("display", () => console.log("display event"));
 
-        // Ad is ready to be displayed
-        // calling 'display' will display the ad
-        ad.call("display", {
-          navClass: "item",
-          tabindex: 9,
-          display: "block",
-        });
+      // Ad is ready to be displayed
+      // calling 'display' will display the ad
+      ad.call("display", {
+        navClass: "item",
+        tabindex: 9,
+        display: "block",
+      });
     }
   });
->>>>>>> Stashed changes
+}
+document.addEventListener("DOMContentLoaded", function () {
+  adsIntervals.push(setInterval(displayAd, 60 * 1000));
+  displayAd();
 });
