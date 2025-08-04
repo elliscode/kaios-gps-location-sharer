@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="theme-color" content="rgb(106, 0, 128)" />
     <title>GPS Location Sharer</title>
-    <link rel="stylesheet" type="text/css" href="/src/css/header.css" />
-    <link rel="stylesheet" type="text/css" href="/src/css/input.css" />
-    <link rel="stylesheet" type="text/css" href="/src/css/softkey.css" />
-    <link rel="stylesheet" type="text/css" href="/src/css/location-sharer.css" />
-    <link rel="stylesheet" type="text/css" href="/src/css/root.css" />
-    <link rel="stylesheet" type="text/css" href="/src/css/help.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/header.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/input.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/softkey.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/location-sharer.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/root.css" />
+    <link rel="stylesheet" type="text/css" href="./src/css/help.css" />
 </head>
 
 <body>
     <div id="root">
         <div class="panel" id="main-ui" active="true">
             <header>
-                <span>GPS Location Sharer</span>
+                <span id="kind">GPS Location Sharer</span>
             </header>
 
             <button nav-selectable="true" id="toggle">Share Location Data</button>
@@ -67,6 +67,7 @@
             <label id="right">Options</label>
         </div>
     </div>
+    <script type="text/javascript" src="./src/kaiads.v5.min.js"></script>
     <script type="text/javascript" src="./src/index.js"></script>
 </body>
 

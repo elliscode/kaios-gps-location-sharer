@@ -1,15 +1,37 @@
-// // kaios simulator testing
-// function mockMethod(thisFunction) {
-//   thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
-// }
-// const navigator = {
-//   geolocation: {
-//     watchPosition: function (success, failure, options) {
-//       return setInterval(mockMethod, 500, success);
-//     }, clearWatch: function (x) { clearInterval(x); }
-//   }
-// }
+// kaios simulator testing
+function mockMethod(thisFunction) {
+  thisFunction({ coords: { longitude: (70 + Math.random()), latitude: (40 + Math.random()) } });
+}
+const navigator2 = {
+  geolocation: {
+    watchPosition: function (success, failure, options) {
+      return setInterval(mockMethod, 500, success);
+    }, clearWatch: function (x) { clearInterval(x); }
+  }
+}
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./src/worker.js');
+
+      console.log('Service Worker registered:', registration);
+
+      // Wait until the page is controlled
+      if (!navigator.serviceWorker.controller) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('Service Worker now controlling the page');
+          navigator.serviceWorker.controller.postMessage({ hello: 'world' });
+        });
+      } else {
+        navigator.serviceWorker.controller.postMessage({ hello: 'world' });
+      }
+
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+    }
+  });
+}
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
 const API_DOMAIN = 'https://gps.dumbphoneapps.com';
@@ -29,7 +51,6 @@ const centerElement = document.getElementById('center');
 const rightElement = document.getElementById('right');
 const settingsExitElement = document.getElementById('settings-exit');
 const watchId = [];
-const sendToServerId = [];
 const dialogs = [];
 const scrollIntervals = [];
 
@@ -69,9 +90,6 @@ function setSoftkeys(left, center, right) {
   leftElement.innerText = left ? left : '';
   centerElement.innerText = center ? center : '';
   rightElement.innerText = right ? right : '';
-}
-function options(event) {
-
 }
 function navigate(event, allElements) {
   const direction = event.key == 'ArrowDown' ? 1 : -1;
@@ -149,43 +167,20 @@ function controlsListener(event) {
     }
   }
 }
-function reportPosition(event) {
-  let url = API_DOMAIN + "/share";
-  let xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("POST", url, true);
-  xmlHttp.onload = handleShare;
-  let payload = {
-    lat: lat,
-    lon: lon,
-    id: uniqueId
-  };
-  xmlHttp.send(JSON.stringify(payload));
-}
-function handleShare(event) {
-  let xmlHttp = event.target;
-  if (xmlHttp.status != 200) {
-    console.log(xmlHttp.status);
-    while (sendToServerId.length > 0) {
-      clearInterval(sendToServerId.pop());
-    }
-  }
-}
 function toggleButtonCallback(event) {
   if (watchId.length > 0) {
     toggleElement.innerText = 'Share Location Data';
     while (watchId.length > 0) {
-      navigator.geolocation.clearWatch(watchId.pop());
+      navigator2.geolocation.clearWatch(watchId.pop());
     }
-    while (sendToServerId.length > 0) {
-      clearInterval(sendToServerId.pop());
-    }
+    navigator.serviceWorker.controller.postMessage(JSON.stringify({command: "stop"}));
     smsLiveElement.setAttribute('nav-selectable', 'false');
     // smsMapsElement.setAttribute('nav-selectable', 'false');
     latElement.innerText = '';
     lonElement.innerText = '';
   } else {
-    watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
-    sendToServerId.push(setInterval(reportPosition, 5000))
+    watchId.push(navigator2.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
+    navigator.serviceWorker.controller.postMessage(JSON.stringify({command: "start"}));
   }
 }
 function showPosition(position) {
@@ -194,6 +189,11 @@ function showPosition(position) {
   // smsMapsElement.setAttribute('nav-selectable', 'true');
   lat = position.coords.latitude;
   lon = position.coords.longitude;
+  navigator.serviceWorker.controller.postMessage(JSON.stringify({
+    lat: lat,
+    lon: lon,
+    id: uniqueId
+  }));
   latElement.innerText = lat;
   lonElement.innerText = lon;
 }
@@ -202,9 +202,7 @@ function displayError() {
   while (watchId.length > 0) {
     navigator.geolocation.clearWatch(watchId.pop());
   }
-  while (sendToServerId.length > 0) {
-    clearInterval(sendToServerId.pop());
-  }
+  navigator.serviceWorker.controller.postMessage(JSON.stringify({command: "stop"}));
   smsLiveElement.setAttribute('nav-selectable', 'false');
   // smsMapsElement.setAttribute('nav-selectable', 'false');
   latElement.innerText = '';
@@ -307,3 +305,18 @@ settingsExitElement.addEventListener("click", function (event) {
   const firstElement = document.querySelectorAll("[nav-selectable]")[0];
   firstElement.focus();
 }
+document.addEventListener("DOMContentLoaded", function () {
+  getKaiAd({
+    publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
+    app: 'gpslocationsharer',
+    slot: 'fullscreenad',
+    onerror: function (err) {
+      showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
+    },
+    onready: function (ad) {
+      // Ad is ready to be displayed
+      // calling 'display' will display the ad
+      ad.call('display')
+    }
+  });
+});
