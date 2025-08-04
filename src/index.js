@@ -40,7 +40,7 @@ let globalInteractTimer = new Date();
 let uniqueId = undefined;
 
 function getAllElements() {
-  return Array.from(document.querySelectorAll('[active="true"]>[nav-selectable="true"]'));
+  return [...document.querySelectorAll('[active="true"]>[nav-selectable="true"]'), ...document.querySelectorAll('[active="true"] .nav-selectable-ad')];
 }
 function selectFirstElement() {
   const allElements = getAllElements();
@@ -323,7 +323,7 @@ function displayAd() {
     // container is required for responsive ads
     container: document.getElementById('ad-container'),
     onerror: function (err) {
-      showDialog('Ad Display Error', 'Could not display ad');
+      console.log('Ad Display Error', 'Could not display ad');
     },
     onready: function (ad) {
 
@@ -340,7 +340,7 @@ function displayAd() {
         // a classname to navigate
         // this classname will be applied
         // to the container
-        navClass: 'nav-selectable',
+        navClass: 'nav-selectable-ad',
 
         // display style will be applied
         // to the container block or inline-block
