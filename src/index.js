@@ -322,5 +322,36 @@ function displayAd() {
     });
   }
 document.addEventListener("DOMContentLoaded", function () {
+<<<<<<< Updated upstream
   adsIntervals.push(setInterval(displayAd, 60 * 1000));
+=======
+  getKaiAd({
+    publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
+    app: 'gpslocationsharer',
+    slot: 'fullscreenad',
+    onerror: function (err) {
+      showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
+    },
+    onready: function (ad) {
+        // user clicked the ad
+        ad.on("click", function () {
+          open_options();
+        });
+
+        // user closed the ad (currently only with fullscreen)
+        ad.on("close", function () { console.log("close event"); });
+
+        // the ad succesfully displayed
+        ad.on("display", () => console.log("display event"));
+
+        // Ad is ready to be displayed
+        // calling 'display' will display the ad
+        ad.call("display", {
+          navClass: "item",
+          tabindex: 9,
+          display: "block",
+        });
+    }
+  });
+>>>>>>> Stashed changes
 });
