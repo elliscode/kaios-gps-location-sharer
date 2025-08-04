@@ -33,6 +33,7 @@ const sendToServerId = [];
 const dialogs = [];
 const scrollIntervals = [];
 const adsIntervals = [];
+const wakeLocks = [];
 
 let lat = undefined;
 let lon = undefined;
@@ -168,19 +169,32 @@ function handleShare(event) {
     }
   }
 }
+function clearIntervals() {
+  while (watchId.length > 0) {
+    navigator.geolocation.clearWatch(watchId.pop());
+  }
+  while (sendToServerId.length > 0) {
+    clearInterval(sendToServerId.pop());
+  }
+  while (wakeLocks.length > 0) {
+    try {
+      wakeLocks.pop().unlock();
+    } catch (e) {
+      // dont care
+    }
+  }
+}
 function toggleButtonCallback(event) {
   if (watchId.length > 0) {
     toggleElement.innerText = 'Share Location Data';
-    while (watchId.length > 0) {
-      navigator.geolocation.clearWatch(watchId.pop());
-    }
-    while (sendToServerId.length > 0) {
-      clearInterval(sendToServerId.pop());
-    }
+    clearIntervals();
     smsLiveElement.setAttribute('nav-selectable', 'false');
     smsMapsElement.setAttribute('nav-selectable', 'false');
     coordsElement.innerText = '';
   } else {
+    if (navigator.b2g) {
+      wakeLocks.push(navigator.b2g.requestWakeLock('gps'));
+    }
     watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
     toggleElement.setAttribute('nav-selectable', 'false');
     toggleElement.blur();
@@ -202,12 +216,7 @@ function showPosition(position) {
 }
 function displayError() {
   showDialog('Geolocation Error', 'Could not fetch device location, ensure Location Services are enabled in Settings');
-  while (watchId.length > 0) {
-    navigator.geolocation.clearWatch(watchId.pop());
-  }
-  while (sendToServerId.length > 0) {
-    clearInterval(sendToServerId.pop());
-  }
+  clearIntervals();
   toggleElement.setAttribute('nav-selectable', 'true');
   smsLiveElement.setAttribute('nav-selectable', 'false');
   smsMapsElement.setAttribute('nav-selectable', 'false');
