@@ -32,6 +32,7 @@ const watchId = [];
 const sendToServerId = [];
 const dialogs = [];
 const scrollIntervals = [];
+const adsIntervals = [];
 
 let lat = undefined;
 let lon = undefined;
@@ -58,11 +59,11 @@ function interact(event) {
 }
 function showPanel(panel) {
   const panels = Array.from(document.getElementsByClassName('panel'));
-  panels.forEach(function(x) {
+  panels.forEach(function (x) {
     x.setAttribute('active', 'false');
   });
   panel.setAttribute('active', 'true');
-  window.scrollTo({top: 0});
+  window.scrollTo({ top: 0 });
   selectFirstElement();
 }
 function setSoftkeys(left, center, right) {
@@ -97,14 +98,14 @@ function handleScroll(event) {
     actuallyScroll(event);
     scrollIntervals.push(setInterval(actuallyScroll, 200, event));
   } else if (event.type == 'keyup') {
-    while(scrollIntervals.length > 0) {
+    while (scrollIntervals.length > 0) {
       clearInterval(scrollIntervals.pop());
     }
   }
 }
 function actuallyScroll(event) {
   const direction = event.key == 'ArrowDown' ? 1 : -1;
-  window.scrollBy({top: direction * 60, behavior: "smooth"});
+  window.scrollBy({ top: direction * 60, behavior: "smooth" });
 }
 function controlsListener(event) {
   const allElements = getAllElements();
@@ -139,9 +140,9 @@ function controlsListener(event) {
           setSoftkeys('', 'SELECT', 'Options');
         }
       } else if (["2"].includes(event.key)) {
-        window.scrollTo({top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (["0"].includes(event.key)) {
-        window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       }
     }
   }
@@ -208,7 +209,7 @@ function displayError() {
   lonElement.innerText = '';
 }
 function closeDialogs() {
-  while(dialogs.length > 0) {
+  while (dialogs.length > 0) {
     dialogs.pop().remove();
   }
 }
@@ -304,18 +305,22 @@ settingsExitElement.addEventListener("click", function (event) {
   const firstElement = document.querySelectorAll("[nav-selectable]")[0];
   firstElement.focus();
 }
+function displayAd() {
+    getKaiAd({
+      publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
+      app: 'gpslocationsharer',
+      slot: 'containerad',
+      w: 240,
+      h: 60,
+	    container: document.getElementById('ad-container'),
+      onerror: function (err) {
+        showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
+      },
+      onready: function (ad) {
+        ad.call('display')
+      }
+    });
+  }
 document.addEventListener("DOMContentLoaded", function () {
-  getKaiAd({
-    publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
-    app: 'gpslocationsharer',
-    slot: 'fullscreenad',
-    onerror: function (err) {
-      showDialog('Ad Display Error', 'Could not display ad ' + err.toString());
-    },
-    onready: function (ad) {
-      // Ad is ready to be displayed
-      // calling 'display' will display the ad
-      ad.call('display')
-    }
-  });
+  adsIntervals.push(setInterval(displayAd, 60 * 1000));
 });

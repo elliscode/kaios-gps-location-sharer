@@ -80,3 +80,9 @@ button[nav-selectable="false"] {
 .dialog .body {
   padding: 2px 5px;
 }
+
+#ad-container {
+  height: 60px;
+  width: 100%;
+  background-color: #666;
+}
