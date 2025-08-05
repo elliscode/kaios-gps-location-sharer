@@ -29,7 +29,6 @@ const centerElement = document.getElementById('center');
 const rightElement = document.getElementById('right');
 const settingsExitElement = document.getElementById('settings-exit');
 const watchId = [];
-const sendToServerId = [];
 const dialogs = [];
 const scrollIntervals = [];
 const adsIntervals = [];
@@ -38,6 +37,7 @@ const wakeLocks = [];
 let lat = undefined;
 let lon = undefined;
 let globalInteractTimer = new Date();
+let globalSendDataTimer = new Date();
 let uniqueId = undefined;
 
 function getAllElements() {
@@ -148,33 +148,9 @@ function controlsListener(event) {
     }
   }
 }
-function reportPosition(event) {
-  let url = API_DOMAIN + "/share";
-  let xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("POST", url, true);
-  xmlHttp.onload = handleShare;
-  let payload = {
-    lat: lat,
-    lon: lon,
-    id: uniqueId
-  };
-  xmlHttp.send(JSON.stringify(payload));
-}
-function handleShare(event) {
-  let xmlHttp = event.target;
-  if (xmlHttp.status != 200) {
-    console.log(xmlHttp.status);
-    while (sendToServerId.length > 0) {
-      clearInterval(sendToServerId.pop());
-    }
-  }
-}
 function clearIntervals() {
   while (watchId.length > 0) {
     navigator.geolocation.clearWatch(watchId.pop());
-  }
-  while (sendToServerId.length > 0) {
-    clearInterval(sendToServerId.pop());
   }
   while (wakeLocks.length > 0) {
     try {
@@ -192,8 +168,12 @@ function toggleButtonCallback(event) {
     smsMapsElement.setAttribute('nav-selectable', 'false');
     coordsElement.innerText = '';
   } else {
-    if (navigator.b2g) {
-      wakeLocks.push(navigator.b2g.requestWakeLock('gps'));
+    if (navigator.b2g && navigator.b2g.requestWakeLock) {
+      try {
+        wakeLocks.push(navigator.b2g.requestWakeLock('gps'));
+      } catch (e) {
+        // dont care
+      }
     }
     watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
     toggleElement.setAttribute('nav-selectable', 'false');
@@ -202,18 +182,39 @@ function toggleButtonCallback(event) {
   }
 }
 function showPosition(position) {
-  if (sendToServerId.length <= 0) {
-    sendToServerId.push(setInterval(reportPosition, 5000));
+  if (toggleElement.innerText != 'Stop Sharing Location') {
+    toggleElement.innerText = 'Stop Sharing Location';
     smsLiveElement.focus();
+    toggleElement.setAttribute('nav-selectable', 'true');
+    smsLiveElement.setAttribute('nav-selectable', 'true');
+    smsMapsElement.setAttribute('nav-selectable', 'true');
   }
-  toggleElement.innerText = 'Stop Sharing Location';
-  toggleElement.setAttribute('nav-selectable', 'true');
-  smsLiveElement.setAttribute('nav-selectable', 'true');
-  smsMapsElement.setAttribute('nav-selectable', 'true');
   lat = position.coords.latitude;
   lon = position.coords.longitude;
+  const currentDate = new Date();
+  if (lat && lon && uniqueId && (currentDate - globalSendDataTimer > 5000)) {
+    reportPosition();
+    globalSendDataTimer = currentDate;
+  }
   coordsElement.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
+function reportPosition() {
+  let url = API_DOMAIN + "/share";
+  let payload = {
+    lat: lat,
+    lon: lon,
+    id: uniqueId
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 function displayError() {
   showDialog('Geolocation Error', 'Could not fetch device location, ensure Location Services are enabled in Settings');
   clearIntervals();
@@ -284,7 +285,7 @@ function setLocalStorage(value) {
 function generateNewId() {
   let output = '';
   const characters = generateCharacterArray();
-  for (let i = 0; i < 10; i++) {
+  for (let j = 0; j < 10; j++) {
     let i = Math.floor(Math.random() * 62);
     output += characters[i];
   }
@@ -292,7 +293,7 @@ function generateNewId() {
 }
 function getUniqueId() {
   let output = getLocalStorage();
-  if (!/[0-9a-f]{32}/.exec(output)) {
+  if (!/[0-9a-f]{10}/.exec(output)) {
     output = generateNewId();
     setLocalStorage(output);
   }
@@ -317,7 +318,9 @@ settingsExitElement.addEventListener("click", function (event) {
 });
 {
   const firstElement = document.querySelectorAll("[nav-selectable]")[0];
-  firstElement.focus();
+  if (firstElement) {
+    firstElement.focus();
+  }
 }
 function displayAd() {
   getKaiAd({
