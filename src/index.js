@@ -14,6 +14,7 @@
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
 const API_DOMAIN = 'https://gps.dumbphoneapps.com';
+const characters = '0123456789bcdfjklmpqrstvwxzBCDFJKLMPQRSTVWXZ';
 const toggleElement = document.getElementById('toggle');
 const mainUi = document.getElementById('main-ui');
 const helpUi = document.getElementById('help-ui');
@@ -260,19 +261,6 @@ function showHelp(event) {
   setSoftkeys('Back', 'OKAY', 'Done');
   showPanel(helpUi);
 }
-function generateCharacterArray() {
-  const characters = [];
-  for (let i = 0; i <= 9; i++) {
-    characters.push(i.toString());
-  }
-  for (let i = 97; i <= 122; i++) {
-    characters.push(String.fromCharCode(i));
-  }
-  for (let i = 65; i <= 90; i++) {
-    characters.push(String.fromCharCode(i));
-  }
-  return characters;
-}
 function getLocalStorage() {
   return localStorage.getItem(LOCAL_STORAGE_ID);
 }
@@ -281,9 +269,8 @@ function setLocalStorage(value) {
 }
 function generateNewId() {
   let output = '';
-  const characters = generateCharacterArray();
   for (let j = 0; j < 10; j++) {
-    let i = Math.floor(Math.random() * 62);
+    let i = Math.floor(Math.random() * characters.length);
     output += characters[i];
   }
   return output;
