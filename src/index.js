@@ -290,7 +290,7 @@ function generateNewId() {
 }
 function getUniqueId() {
   let output = getLocalStorage();
-  if (!/[0-9a-f]{10}/.exec(output)) {
+  if (!/[0-9a-zA-Z]{10}/.exec(output)) {
     output = generateNewId();
     setLocalStorage(output);
   }
@@ -320,6 +320,10 @@ settingsExitElement.addEventListener("click", function (event) {
   }
 }
 function displayAd() {
+  let oldAds = Array.from(document.querySelectorAll('.nav-selectable-ad'));
+  for (let i = 0; i < oldAds; i++) {
+    oldAds[i].remove();
+  }
   getKaiAd({
     publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',
     app: 'gpslocationsharer',
@@ -359,6 +363,9 @@ function displayAd() {
   });
 }
 document.addEventListener("DOMContentLoaded", function () {
-  adsIntervals.push(setInterval(displayAd, 60 * 1000));
+  while (adsIntervals.length > 0) {
+    clearInterval(adsIntervals.pop());
+  }
+  adsIntervals.push(setInterval(displayAd, 300 * 1000));
   displayAd();
 });
