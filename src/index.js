@@ -297,7 +297,8 @@ function getUniqueId() {
   return output;
 }
 function generateNewIdUi() {
-  uniqueId = getUniqueId();
+  uniqueId = generateNewId();
+  setLocalStorage(uniqueId);
   uniqueIdElement.innerText = uniqueId;
 }
 uniqueId = getUniqueId();
