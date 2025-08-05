@@ -1,7 +1,7 @@
 {
     "id": "GPS-Location-Sharer",
     "name": "GPS Location Sharer",
-    "short_name": "GPS Share 13",
+    "short_name": "GPS Sharer",
     "description": "GPS Location Sharer lets you share your real-time location with anyone, no account needed. Just tap a button to send your live location updates via SMS. Your data is stored in the cloud, and deletes itself after one hour of inactivity. The shared link works across all major devices, including iOS, Android, KaiOS, and desktop computers.",
     "lang": "en-US",
     "theme_color": "#f5bcff",
@@ -25,7 +25,7 @@
         "permissions": {
             "geolocation": ""
         },
-        "version": "1.0.13",
+        "version": "1.0.16",
         "developer": {
             "name": "elliscode",
             "url": "http://www.elliscode.com"

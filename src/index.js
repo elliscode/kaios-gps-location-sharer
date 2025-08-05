@@ -199,8 +199,8 @@ function showPosition(position) {
   coordsElement.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
 function reportPosition() {
-  let url = API_DOMAIN + "/share";
-  let payload = {
+  const url = API_DOMAIN + "/share";
+  const payload = {
     lat: lat,
     lon: lon,
     id: uniqueId
@@ -208,9 +208,6 @@ function reportPosition() {
 
   fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: JSON.stringify(payload)
   });
 }
