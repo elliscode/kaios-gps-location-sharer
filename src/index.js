@@ -13,7 +13,7 @@
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
-const API_DOMAIN = 'https://gps.dumbphoneapps.com';
+const API_DOMAIN = 'https://gpsv2.dumbphoneapps.com';
 const characters = '0123456789bcdfjlmpqrstwxzBCDFJLMPQRSTWXZ';
 const toggleElement = document.getElementById('toggle');
 const mainUi = document.getElementById('main-ui');
@@ -40,6 +40,7 @@ let lon = undefined;
 let globalInteractTimer = new Date();
 let globalSendDataTimer = new Date();
 let uniqueId = undefined;
+let startTime = new Date();
 
 function getAllElements() {
   return [...document.querySelectorAll('[active="true"]>[nav-selectable="true"]'), ...document.querySelectorAll('[active="true"] .nav-selectable-ad')];
@@ -161,14 +162,18 @@ function clearIntervals() {
     }
   }
 }
-function toggleButtonCallback(event) {
-  if (watchId.length > 0) {
+function stopSharingLocation() {
     toggleElement.innerText = 'Share Location Data';
     clearIntervals();
     smsLiveElement.setAttribute('nav-selectable', 'false');
     smsMapsElement.setAttribute('nav-selectable', 'false');
     coordsElement.innerText = '';
+}
+function toggleButtonCallback(event) {
+  if (watchId.length > 0) {
+    stopSharingLocation();
   } else {
+    startTime = new Date();
     if (navigator.b2g && navigator.b2g.requestWakeLock) {
       try {
         wakeLocks.push(navigator.b2g.requestWakeLock('gps'));
@@ -183,6 +188,12 @@ function toggleButtonCallback(event) {
   }
 }
 function showPosition(position) {
+  let currentTime = new Date();
+  if (currentTime - startTime > 2 * 60 * 60 * 1000) {
+    showDialog("Sharing stopped", 'Sharing stopped due to 2 hour time limit being reached, please press "Share Location Data" if you wish to continue');
+    stopSharingLocation();
+    return;
+  }
   if (toggleElement.innerText != 'Stop Sharing Location') {
     toggleElement.innerText = 'Stop Sharing Location';
     smsLiveElement.focus();
