@@ -221,6 +221,10 @@ function reportPosition() {
   fetch(url, {
     method: "POST",
     body: JSON.stringify(payload)
+  }).then(response => {
+      if (!response.ok && response.status === 429) {
+        stopSharingLocation();
+      }
   });
 }
 
