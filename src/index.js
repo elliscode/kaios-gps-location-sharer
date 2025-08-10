@@ -223,6 +223,7 @@ function reportPosition() {
     body: JSON.stringify(payload)
   }).then(response => {
       if (!response.ok && response.status === 429) {
+      showDialog("Sharing stopped", 'Sharing stopped due to too many requests, please try again later.');
         stopSharingLocation();
       }
   });
