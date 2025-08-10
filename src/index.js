@@ -181,7 +181,7 @@ function toggleButtonCallback(event) {
         // dont care
       }
     }
-    watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 30 * 1000 }));
+    watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 60 * 1000 }));
     toggleElement.setAttribute('nav-selectable', 'false');
     toggleElement.blur();
     coordsElement.innerText = 'Getting location, please wait...';
@@ -204,7 +204,7 @@ function showPosition(position) {
   lat = position.coords.latitude;
   lon = position.coords.longitude;
   const currentDate = new Date();
-  if (lat && lon && uniqueId && (currentDate - globalSendDataTimer > 5000)) {
+  if (lat && lon && uniqueId && (currentDate - globalSendDataTimer > 5 * 1000)) {
     reportPosition();
     globalSendDataTimer = currentDate;
   }
