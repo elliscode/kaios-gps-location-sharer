@@ -163,11 +163,11 @@ function clearIntervals() {
   }
 }
 function stopSharingLocation() {
-    toggleElement.innerText = 'Share Location Data';
-    clearIntervals();
-    smsLiveElement.setAttribute('nav-selectable', 'false');
-    smsMapsElement.setAttribute('nav-selectable', 'false');
-    coordsElement.innerText = '';
+  toggleElement.innerText = 'Share Location Data';
+  clearIntervals();
+  smsLiveElement.setAttribute('nav-selectable', 'false');
+  smsMapsElement.setAttribute('nav-selectable', 'false');
+  coordsElement.innerText = '';
 }
 function toggleButtonCallback(event) {
   if (watchId.length > 0) {
