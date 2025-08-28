@@ -14,6 +14,7 @@
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
 const API_DOMAIN = 'https://gpsv2.dumbphoneapps.com';
+const ID_REGEX = /^[0-9a-zA-Z]{10}$/;
 const characters = '0123456789bcdfjlmpqrstwxzBCDFJLMPQRSTWXZ';
 const toggleElement = document.getElementById('toggle');
 const mainUi = document.getElementById('main-ui');
@@ -29,6 +30,8 @@ const leftElement = document.getElementById('left');
 const centerElement = document.getElementById('center');
 const rightElement = document.getElementById('right');
 const settingsExitElement = document.getElementById('settings-exit');
+const freqButtons = Array.from(document.querySelectorAll(`button[freq]`));
+const lengthButtons = Array.from(document.querySelectorAll(`button[length]`));
 const watchId = [];
 const dialogs = [];
 const scrollIntervals = [];
@@ -37,13 +40,12 @@ const wakeLocks = [];
 
 let lat = undefined;
 let lon = undefined;
-let globalInteractTimer = new Date();
-let globalSendDataTimer = new Date();
-let uniqueId = undefined;
+let globalInteractTimer = new Date(0);
+let globalSendDataTimer = new Date(0);
 let startTime = new Date();
 
 function getAllElements() {
-  return [...document.querySelectorAll('[active="true"]>[nav-selectable="true"]'), ...document.querySelectorAll('[active="true"] .nav-selectable-ad')];
+  return [...document.querySelectorAll('[active="true"] [nav-selectable="true"]'), ...document.querySelectorAll('[active="true"] .nav-selectable-ad')];
 }
 function selectFirstElement() {
   const allElements = getAllElements();
@@ -75,26 +77,54 @@ function setSoftkeys(left, center, right) {
   rightElement.innerText = right ? right : '';
 }
 function navigate(event, allElements) {
-  const direction = event.key == 'ArrowDown' ? 1 : -1;
-  let currentIndex = allElements.findIndex(function (x) {
-    return x == event.target;
-  });
-  if (currentIndex < 0) {
-    currentIndex = 0;
-  }
-  const desiredIndex = (currentIndex + direction + allElements.length) % allElements.length;
-  if (desiredIndex == 0) {
-    window.scrollTo({ top: 0 });
-  } else {
-    const rect = allElements[desiredIndex].getBoundingClientRect();
-    const diff = (rect.y + 80) - window.innerHeight;
-    console.log(rect.y);
-    console.log(window.innerHeight);
-    if (diff > 0) {
-      window.scrollBy({ top: diff });
+  if (['ArrowLeft', 'ArrowRight'].includes(event.key) && event.target.hasAttribute('horz-selectable-group')) {
+    const horzGroupName = event.target.getAttribute('horz-selectable-group');
+    const horzElements = Array.from(document.querySelectorAll(`[active="true"] [horz-selectable-group="${horzGroupName}"]`));
+    const direction = event.key == 'ArrowRight' ? 1 : -1;
+    let currentIndex = horzElements.findIndex(function (x) {
+      return x == event.target;
+    });
+    if (currentIndex < 0) {
+      currentIndex = 0;
     }
+    const desiredIndex = (currentIndex + direction + horzElements.length) % horzElements.length;
+    horzElements[desiredIndex].focus();
+  } else if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+    const direction = event.key == 'ArrowDown' ? 1 : -1;
+    let currentIndex = allElements.findIndex(function (x) {
+      return x == getParentWithAttribute(event.target, 'nav-selectable');
+    });
+    if (currentIndex < 0) {
+      currentIndex = 0;
+    }
+    const desiredIndex = (currentIndex + direction + allElements.length) % allElements.length;
+    if (desiredIndex == 0) {
+      window.scrollTo({ top: 0 });
+    } else {
+      const rect = allElements[desiredIndex].getBoundingClientRect();
+      const diff = (rect.y + 80) - window.innerHeight;
+      if (diff > 0) {
+        window.scrollBy({ top: diff });
+      }
+    }
+    findFocusableElement(allElements[desiredIndex]).focus();
   }
-  allElements[desiredIndex].focus();
+}
+function getParentWithAttribute(element, attribute) {
+  let output = element;
+  while (output) {
+    if (output.hasAttribute(attribute)) {
+      return output;
+    }
+    output = output.parentElement;
+  }
+  return output;
+}
+function findFocusableElement(element) {
+  if (element.matches(`button[nav-selectable="true"]`)) {
+    return element;
+  }
+  return element.querySelector(`button[nav-selectable="true"], button[horz-selectable-group]`);
 }
 function handleScroll(event) {
   if (event.type == 'keydown' && scrollIntervals.length <= 0) {
@@ -115,7 +145,7 @@ function controlsListener(event) {
   if (allElements.length <= 0 && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
     handleScroll(event);
   } else if (event.type == 'keydown') {
-    if (allElements.length > 0 && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+    if (allElements.length > 0 && ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) {
       event.preventDefault();
       navigate(event, allElements);
     } else {
@@ -135,7 +165,6 @@ function controlsListener(event) {
       } else if (["SoftRight"].includes(event.key)) {
         closeDialogs();
         if (rightElement.innerText == 'Options') {
-          uniqueIdElement.innerText = uniqueId;
           showPanel(settingsUi);
           setSoftkeys('Back', 'SELECT', 'Done');
         } else {
@@ -162,12 +191,28 @@ function clearIntervals() {
     }
   }
 }
+function setUiBasedOnCurrentStatus(statusOverride) {
+  if (statusOverride == 'stop-sharing') {
+    coordsElement.innerText = '';
+    toggleElement.innerText = 'Share Location Data';
+    toggleElement.setAttribute('nav-selectable', 'true');
+    smsLiveElement.setAttribute('nav-selectable', 'false');
+    smsMapsElement.setAttribute('nav-selectable', 'false');
+  } else if (statusOverride == 'awaiting-location') {
+    toggleElement.setAttribute('nav-selectable', 'false');
+    toggleElement.blur();
+    coordsElement.innerText = 'Getting location, please wait...';
+  } else if (statusOverride == 'active-location') {
+    toggleElement.innerText = 'Stop Sharing Location';
+    smsLiveElement.focus();
+    toggleElement.setAttribute('nav-selectable', 'true');
+    smsLiveElement.setAttribute('nav-selectable', 'true');
+    smsMapsElement.setAttribute('nav-selectable', 'true');
+  }
+}
 function stopSharingLocation() {
-  toggleElement.innerText = 'Share Location Data';
   clearIntervals();
-  smsLiveElement.setAttribute('nav-selectable', 'false');
-  smsMapsElement.setAttribute('nav-selectable', 'false');
-  coordsElement.innerText = '';
+  setUiBasedOnCurrentStatus('stop-sharing');
 }
 function toggleButtonCallback(event) {
   if (watchId.length > 0) {
@@ -182,40 +227,36 @@ function toggleButtonCallback(event) {
       }
     }
     watchId.push(navigator.geolocation.watchPosition(showPosition, displayError, { timeout: 60 * 1000 }));
-    toggleElement.setAttribute('nav-selectable', 'false');
-    toggleElement.blur();
-    coordsElement.innerText = 'Getting location, please wait...';
+    setUiBasedOnCurrentStatus('awaiting-location');
   }
 }
 function showPosition(position) {
+  let localStorageData = getLocalStorage();
   let currentTime = new Date();
-  if (currentTime - startTime > 2 * 60 * 60 * 1000) {
+  if (currentTime - startTime > localStorageData.length * 60 * 1000) {
     showDialog("Sharing stopped", 'Sharing stopped due to 2 hour time limit being reached, please press "Share Location Data" if you wish to continue');
     stopSharingLocation();
     return;
   }
   if (toggleElement.innerText != 'Stop Sharing Location') {
-    toggleElement.innerText = 'Stop Sharing Location';
-    smsLiveElement.focus();
-    toggleElement.setAttribute('nav-selectable', 'true');
-    smsLiveElement.setAttribute('nav-selectable', 'true');
-    smsMapsElement.setAttribute('nav-selectable', 'true');
+    setUiBasedOnCurrentStatus('active-location');
   }
   lat = position.coords.latitude;
   lon = position.coords.longitude;
   const currentDate = new Date();
-  if (lat && lon && uniqueId && (currentDate - globalSendDataTimer > 5 * 1000)) {
+  if (lat && lon && (currentDate - globalSendDataTimer > localStorageData.freq * 1000)) {
     reportPosition();
     globalSendDataTimer = currentDate;
   }
   coordsElement.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
 function reportPosition() {
+  let localStorageData = getLocalStorage();
   const url = API_DOMAIN + "/share";
   const payload = {
     lat: lat,
     lon: lon,
-    id: uniqueId
+    id: localStorageData.id
   };
 
   fetch(url, {
@@ -232,10 +273,7 @@ function reportPosition() {
 function displayError() {
   showDialog('Geolocation Error', 'Could not fetch device location, ensure Location Services are enabled in Settings');
   clearIntervals();
-  toggleElement.setAttribute('nav-selectable', 'true');
-  smsLiveElement.setAttribute('nav-selectable', 'false');
-  smsMapsElement.setAttribute('nav-selectable', 'false');
-  coordsElement.innerText = '';
+  setUiBasedOnCurrentStatus('stop-sharing');
 }
 function closeDialogs() {
   while (dialogs.length > 0) {
@@ -278,10 +316,48 @@ function showHelp(event) {
   showPanel(helpUi);
 }
 function getLocalStorage() {
-  return localStorage.getItem(LOCAL_STORAGE_ID);
+  let output = { id: generateNewId(), freq: 30, length: 15 };
+  let saveStorage = true;
+  try {
+    const stringValue = localStorage.getItem(LOCAL_STORAGE_ID);
+    if (ID_REGEX.exec(stringValue)) {
+      output = { id: stringValue, freq: 30, length: 15 };
+    } else if (stringValue) {
+      let temp = JSON.parse(stringValue);
+      if (!(temp.freq && temp.id && temp.length)) {
+        throw Error("localStorage is missing fields");
+      }
+      output = temp;
+      saveStorage = false;
+    }
+  } catch (e) {
+    // dont care
+  }
+  if (saveStorage) {
+    localStorage.setItem(LOCAL_STORAGE_ID, JSON.stringify(output));
+  }
+  return output;
+}
+function setGuiBasedOnLocalStorage() {
+  let value = getLocalStorage();
+  uniqueIdElement.innerText = value.id;
+  freqButtons.forEach(function (button) { button.classList.remove('selected'); });
+  lengthButtons.forEach(function (button) { button.classList.remove('selected'); });
+  document.querySelector(`button[freq="${value.freq}"]`).classList.add('selected');
+  document.querySelector(`button[length="${value.length}"]`).classList.add('selected');
 }
 function setLocalStorage(value) {
-  localStorage.setItem(LOCAL_STORAGE_ID, value);
+  let fullValue = getLocalStorage();
+  if (value.id) {
+    fullValue.id = value.id;
+  }
+  if (value.freq) {
+    fullValue.freq = value.freq;
+  }
+  if (value.length) {
+    fullValue.length = value.length;
+  }
+  localStorage.setItem(LOCAL_STORAGE_ID, JSON.stringify(fullValue));
 }
 function generateNewId() {
   let output = '';
@@ -293,18 +369,24 @@ function generateNewId() {
 }
 function getUniqueId() {
   let output = getLocalStorage();
-  if (!/[0-9a-zA-Z]{10}/.exec(output)) {
-    output = generateNewId();
-    setLocalStorage(output);
-  }
-  return output;
+  setGuiBasedOnLocalStorage();
+  return output.id;
 }
 function generateNewIdUi() {
-  uniqueId = generateNewId();
-  setLocalStorage(uniqueId);
+  setLocalStorage({id: generateNewId()});
+  setGuiBasedOnLocalStorage();
   uniqueIdElement.innerText = uniqueId;
 }
-uniqueId = getUniqueId();
+function setFreq(event) {
+  const value = parseInt(event.target.getAttribute('freq'));
+  setLocalStorage({freq: value});
+  setGuiBasedOnLocalStorage();
+}
+function setLength(event) {
+  const value = parseInt(event.target.getAttribute('length'));
+  setLocalStorage({length: value});
+  setGuiBasedOnLocalStorage();
+}
 document.addEventListener("keydown", controlsListener);
 document.addEventListener("keyup", controlsListener);
 smsLiveElement.addEventListener("click", sendLiveLinkSms);
@@ -312,6 +394,8 @@ smsMapsElement.addEventListener("click", sendMapsLinkSms);
 toggleElement.addEventListener("click", toggleButtonCallback);
 helpElement.addEventListener("click", showHelp);
 newIdElement.addEventListener("click", generateNewIdUi);
+freqButtons.forEach(function(button) { button.addEventListener("click", setFreq); });
+lengthButtons.forEach(function(button) { button.addEventListener("click", setLength); });
 settingsExitElement.addEventListener("click", function (event) {
   closeDialogs();
   showPanel(mainUi);
@@ -373,3 +457,12 @@ document.addEventListener("DOMContentLoaded", function () {
   adsIntervals.push(setInterval(displayAd, 300 * 1000));
   displayAd();
 });
+window.addEventListener("focus", function() {
+  let status = 'stop-sharing';
+  if (watchId.length > 0) {
+    status = 'active-location';
+  }
+  setUiBasedOnCurrentStatus(status);
+});
+getLocalStorage();
+setGuiBasedOnLocalStorage();

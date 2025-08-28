@@ -59,12 +59,30 @@
             <div class="flex col info"><span class="label">Version</span><span class="value" id="app-version">1.0.20</span></div>
             <div class="flex col info"><span class="label">ID:</span><span class="value" id="unique-id"></span></div>
             <button nav-selectable="true" id="new-id">Generate New ID</button>
+            <div nav-selectable="true" class="flex col nav-group">
+                <span class="label">Share Frequency:</span>
+                <div class="flex row">
+                    <button class="selected" horz-selectable-group="freq" freq="30">30 s</button>
+                    <button horz-selectable-group="freq" freq="15">15 s</button>
+                    <button horz-selectable-group="freq" freq="10">10 s</button>
+                    <button horz-selectable-group="freq" freq="5">5 s</button>
+                </div>
+            </div>
+            <div nav-selectable="true" class="flex col nav-group">
+                <span class="label">Share Time Limit:</span>
+                <div class="flex row">
+                    <button class="selected" horz-selectable-group="length" length="15">15 m</button>
+                    <button horz-selectable-group="length" length="30">30 m</button>
+                    <button horz-selectable-group="length" length="60">60 m</button>
+                    <button horz-selectable-group="length" length="120">120 m</button>
+                </div>
+            </div>
             <button nav-selectable="true" id="settings-exit">Back</button>
         </div>
         <div id="softkey">
-            <label id="left"></label>
+            <label id="left" onclick="controlsListener({type: 'keydown', key: 'SoftLeft', preventDefault: function () {}, target: event.target});"></label>
             <label id="center">SELECT</label>
-            <label id="right">Options</label>
+            <label id="right" onclick="controlsListener({type: 'keydown', key: 'SoftRight', preventDefault: function () {}, target: event.target});">Options</label>
         </div>
     </div>
     <script type="text/javascript" src="./src/kaiads.v5.min.js?v=1.0.20"></script>

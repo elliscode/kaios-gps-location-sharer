@@ -1,14 +1,19 @@
+[nav-selectable] {
+  margin: 2.5px 10px;
+}
+[nav-selectable] > * {
+  margin: 0;
+}
 button {
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  padding: 3px 10px;
-  margin: 2.5px 10px;
   border-radius: 18px;
   border: 2px solid #555;
   font-weight: bold;
+  padding: 3px 10px;
 }
 
 button:focus {
@@ -24,7 +29,7 @@ button[nav-selectable="false"] {
 
 .info {
   background-color: white;
-  padding: 5px 10px;
+  padding: 5px 20px;
   margin: 2.5px 10px;
   border-radius: 18px;
   overflow:hidden;
@@ -98,4 +103,31 @@ button[nav-selectable="false"] {
 
 .grow {
   flex-grow: 1;
+}
+
+.nav-group {
+  background-color: white;
+  border-radius: 18px;
+}
+.nav-group > span.label {
+   margin-left: 20px;
+}
+
+button[horz-selectable-group] {
+  padding: 3px 0px;
+  border-radius: 0px;
+  border-width: 2px 0px 2px 2px;
+  flex-grow: 1;
+}
+
+button[horz-selectable-group]:first-child {
+  border-radius: 18px 0px 0px 18px;
+}
+
+button[horz-selectable-group]:last-child {
+  border-right-width: 2px;
+  border-radius: 0px 18px 18px 0px;
+}
+.selected {
+  background-color:rgb(130, 254, 130);
 }
