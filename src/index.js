@@ -234,7 +234,7 @@ function showPosition(position) {
   let localStorageData = getLocalStorage();
   let currentTime = new Date();
   if (currentTime - startTime > localStorageData.length * 60 * 1000) {
-    showDialog("Sharing stopped", 'Sharing stopped due to 2 hour time limit being reached, please press "Share Location Data" if you wish to continue');
+    showDialog("Sharing stopped", `Sharing stopped due to ${localStorageData.length} minute time limit being reached, please press "Share Location Data" if you wish to continue`);
     stopSharingLocation();
     return;
   }
