@@ -92,7 +92,7 @@ function navigate(event, allElements) {
   } else if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
     const direction = event.key == 'ArrowDown' ? 1 : -1;
     let currentIndex = allElements.findIndex(function (x) {
-      return x == getParentWithAttribute(event.target, 'nav-selectable');
+      return x == getNavSelectableParent(event.target);
     });
     if (currentIndex < 0) {
       currentIndex = 0;
@@ -110,10 +110,10 @@ function navigate(event, allElements) {
     findFocusableElement(allElements[desiredIndex]).focus();
   }
 }
-function getParentWithAttribute(element, attribute) {
+function getNavSelectableParent(element) {
   let output = element;
   while (output) {
-    if (output.hasAttribute(attribute)) {
+    if (output.hasAttribute('nav-selectable') || output.classList.contains('nav-selectable-ad')) {
       return output;
     }
     output = output.parentElement;
@@ -409,7 +409,7 @@ settingsExitElement.addEventListener("click", function (event) {
 }
 function displayAd() {
   let oldAds = Array.from(document.querySelectorAll('.nav-selectable-ad'));
-  for (let i = 0; i < oldAds; i++) {
+  for (let i = 0; i < oldAds.length; i++) {
     oldAds[i].remove();
   }
   getKaiAd({
