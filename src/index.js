@@ -121,7 +121,7 @@ function getParentWithAttribute(element, attribute) {
   return output;
 }
 function findFocusableElement(element) {
-  if (element.matches(`button[nav-selectable="true"]`)) {
+  if (element.matches(`button[nav-selectable="true"]`) || element.matches('.nav-selectable-ad')) {
     return element;
   }
   return element.querySelector(`button[nav-selectable="true"], button[horz-selectable-group]`);
@@ -201,7 +201,7 @@ function setUiBasedOnCurrentStatus(statusOverride) {
   } else if (statusOverride == 'awaiting-location') {
     toggleElement.setAttribute('nav-selectable', 'false');
     toggleElement.blur();
-    coordsElement.innerText = 'Getting location, please wait...';
+    coordsElement.innerText = 'Getting GPS, please wait...';
   } else if (statusOverride == 'active-location') {
     toggleElement.innerText = 'Stop Sharing Location';
     smsLiveElement.focus();
