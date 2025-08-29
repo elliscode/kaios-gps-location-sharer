@@ -307,8 +307,9 @@ function sendMapsLinkSms(event) {
   smsLink.click();
 }
 function sendLiveLinkSms(event) {
+  let localStorageData = getLocalStorage();
   const smsLink = document.createElement('a');
-  smsLink.href = "sms://?&body=" + encodeURIComponent("I'm sharing my location: " + UI_DOMAIN.substring(8) + "/lv/?id=" + uniqueId);
+  smsLink.href = "sms://?&body=" + encodeURIComponent("I'm sharing my location: " + UI_DOMAIN.substring(8) + "/lv/?id=" + localStorageData.id);
   smsLink.click();
 }
 function showHelp(event) {
@@ -375,7 +376,8 @@ function getUniqueId() {
 function generateNewIdUi() {
   setLocalStorage({id: generateNewId()});
   setGuiBasedOnLocalStorage();
-  uniqueIdElement.innerText = uniqueId;
+  let localStorageData = getLocalStorage();
+  uniqueIdElement.innerText = localStorageData.id;
 }
 function setFreq(event) {
   const value = parseInt(event.target.getAttribute('freq'));
