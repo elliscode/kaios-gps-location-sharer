@@ -131,6 +131,15 @@ button[horz-selectable-group]:last-child {
 .selected {
   background-color:rgb(130, 254, 130);
 }
+.nav-selectable-ad {
+  width: 240px;
+  max-width: 240px;
+  min-width: 240px;
+  height:60px;
+  max-height:60px;
+  min-height:60px;
+  overflow:hidden;
+}
 .nav-selectable-ad:focus {
   outline: 2px solid purple;
 }
