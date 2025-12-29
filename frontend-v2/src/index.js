@@ -13,7 +13,7 @@
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
-const API_DOMAIN = 'https://gpsv2.dumbphoneapps.com';
+const API_DOMAIN = 'https://gpsv3.dumbphoneapps.com';
 const ID_REGEX = /^[0-9a-zA-Z]{10}$/;
 const characters = '0123456789bcdfjlmpqrstwxzBCDFJLMPQRSTWXZ';
 const toggleElement = document.getElementById('toggle');
@@ -30,8 +30,8 @@ const leftElement = document.getElementById('left');
 const centerElement = document.getElementById('center');
 const rightElement = document.getElementById('right');
 const settingsExitElement = document.getElementById('settings-exit');
-const freqButtons = Array.from(document.querySelectorAll(`button[freq]`));
-const lengthButtons = Array.from(document.querySelectorAll(`button[length]`));
+const freqButtons = [].slice.call(document.querySelectorAll(`button[freq]`));
+const lengthButtons = [].slice.call(document.querySelectorAll(`button[length]`));
 const watchId = [];
 const dialogs = [];
 const scrollIntervals = [];
@@ -45,7 +45,15 @@ let globalSendDataTimer = new Date(0);
 let startTime = new Date();
 
 function getAllElements() {
-  return [...document.querySelectorAll('[active="true"] [nav-selectable="true"]'), ...document.querySelectorAll('[active="true"] .nav-selectable-ad')];
+  var a = document.querySelectorAll('[active="true"] [nav-selectable="true"]');
+  var b = document.querySelectorAll('[active="true"] .nav-selectable-ad');
+  return Array.prototype.concat.call([], a, b);
+}
+function findIndex(arr, fn) {
+  for (var i = 0; i < arr.length; i++) {
+    if (fn(arr[i])) return i;
+  }
+  return -1;
 }
 function selectFirstElement() {
   const allElements = getAllElements();
@@ -63,12 +71,12 @@ function interact(event) {
   }
 }
 function showPanel(panel) {
-  const panels = Array.from(document.getElementsByClassName('panel'));
+  const panels = [].slice.call(document.getElementsByClassName('panel'));
   panels.forEach(function (x) {
     x.setAttribute('active', 'false');
   });
   panel.setAttribute('active', 'true');
-  window.scrollTo({ top: 0 });
+  window.scrollTo(0, 0);
   selectFirstElement();
 }
 function setSoftkeys(left, center, right) {
@@ -77,11 +85,11 @@ function setSoftkeys(left, center, right) {
   rightElement.innerText = right ? right : '';
 }
 function navigate(event, allElements) {
-  if (['ArrowLeft', 'ArrowRight'].includes(event.key) && event.target.hasAttribute('horz-selectable-group')) {
+  if (['ArrowLeft', 'ArrowRight'].indexOf(event.key) !== -1 && event.target.hasAttribute('horz-selectable-group')) {
     const horzGroupName = event.target.getAttribute('horz-selectable-group');
-    const horzElements = Array.from(document.querySelectorAll(`[active="true"] [horz-selectable-group="${horzGroupName}"]`));
+    const horzElements = [].slice.call(document.querySelectorAll(`[active="true"] [horz-selectable-group="${horzGroupName}"]`));
     const direction = event.key == 'ArrowRight' ? 1 : -1;
-    let currentIndex = horzElements.findIndex(function (x) {
+    let currentIndex = findIndex(horzElements, function (x) {
       return x == event.target;
     });
     if (currentIndex < 0) {
@@ -89,9 +97,9 @@ function navigate(event, allElements) {
     }
     const desiredIndex = (currentIndex + direction + horzElements.length) % horzElements.length;
     horzElements[desiredIndex].focus();
-  } else if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+  } else if (['ArrowUp', 'ArrowDown'].indexOf(event.key) !== -1) {
     const direction = event.key == 'ArrowDown' ? 1 : -1;
-    let currentIndex = allElements.findIndex(function (x) {
+    let currentIndex = findIndex(allElements, function (x) {
       return x == getNavSelectableParent(event.target);
     });
     if (currentIndex < 0) {
@@ -99,15 +107,18 @@ function navigate(event, allElements) {
     }
     const desiredIndex = (currentIndex + direction + allElements.length) % allElements.length;
     if (desiredIndex == 0) {
-      window.scrollTo({ top: 0 });
+      window.scrollTo(0, 0);
     } else {
       const rect = allElements[desiredIndex].getBoundingClientRect();
       const diff = (rect.y + 80) - window.innerHeight;
       if (diff > 0) {
-        window.scrollBy({ top: diff });
+        window.scrollBy(0, diff);
       }
     }
-    findFocusableElement(allElements[desiredIndex]).focus();
+    var el = findFocusableElement(allElements[desiredIndex]);
+    if (el && el.focus) {
+      el.focus();
+    }
   }
 }
 function getNavSelectableParent(element) {
@@ -121,7 +132,8 @@ function getNavSelectableParent(element) {
   return output;
 }
 function findFocusableElement(element) {
-  if (element.matches(`button[nav-selectable="true"]`) || element.matches('.nav-selectable-ad')) {
+  if ((element.tagName.toLower() == 'button' && element.getAttribute('nav-selectable') == "true") || 
+      element.classList.contains('nav-selectable-ad')) {
     return element;
   }
   return element.querySelector(`button[nav-selectable="true"], button[horz-selectable-group]`);
@@ -138,14 +150,14 @@ function handleScroll(event) {
 }
 function actuallyScroll(event) {
   const direction = event.key == 'ArrowDown' ? 1 : -1;
-  window.scrollBy({ top: direction * 60, behavior: "smooth" });
+  window.scrollBy(0, direction * 60);
 }
 function controlsListener(event) {
   const allElements = getAllElements();
-  if (allElements.length <= 0 && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+  if (allElements.length <= 0 && ['ArrowDown', 'ArrowUp'].indexOf(event.key) !== -1) {
     handleScroll(event);
   } else if (event.type == 'keydown') {
-    if (allElements.length > 0 && ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) {
+    if (allElements.length > 0 && ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].indexOf(event.key) !== -1) {
       event.preventDefault();
       navigate(event, allElements);
     } else {
@@ -155,14 +167,14 @@ function controlsListener(event) {
       }
       globalInteractTimer = currentDate;
 
-      if (['Enter'].includes(event.key)) {
+      if (['Enter'].indexOf(event.key) !== -1) {
         event.preventDefault();
         interact(event);
-      } else if (["SoftLeft", "Backspace"].includes(event.key)) {
+      } else if (["SoftLeft", "Backspace"].indexOf(event.key) !== -1) {
         closeDialogs();
         showPanel(mainUi);
         setSoftkeys('', 'SELECT', 'Options');
-      } else if (["SoftRight"].includes(event.key)) {
+      } else if (["SoftRight"].indexOf(event.key) !== -1) {
         closeDialogs();
         if (rightElement.innerText == 'Options') {
           showPanel(settingsUi);
@@ -171,10 +183,10 @@ function controlsListener(event) {
           showPanel(mainUi);
           setSoftkeys('', 'SELECT', 'Options');
         }
-      } else if (["2"].includes(event.key)) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else if (["0"].includes(event.key)) {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      } else if (["2"].indexOf(event.key) !== -1) {
+        window.scrollTo(0, 0);
+      } else if (["0"].indexOf(event.key) !== -1) {
+        window.scrollTo(0, document.body.scrollHeight);
       }
     }
   }
@@ -248,7 +260,7 @@ function showPosition(position) {
     reportPosition();
     globalSendDataTimer = currentDate;
   }
-  coordsElement.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  coordsElement.innerText = lat.toFixed(5) + ', ' + lon.toFixed(5);
 }
 function reportPosition() {
   let localStorageData = getLocalStorage();
@@ -266,8 +278,8 @@ function reportPosition() {
 
 function handleResponse(event) {
   const response = event.target;
-  if (!response.ok && response.status === 429) {
-  showDialog("Sharing stopped", 'Sharing stopped due to too many requests, please try again later.');
+  if (response.status === 429) {
+    showDialog("Sharing stopped", 'Sharing stopped due to too many requests, please try again later.');
     stopSharingLocation();
   }
 }
@@ -303,7 +315,7 @@ function showDialog(title, text) {
 }
 function sendMapsLinkSms(event) {
   const smsLink = document.createElement('a');
-  let coordsString = `${lat},${lon}`;
+  let coordsString = lat.toFixed(5) + ', ' + lon.toFixed(5);
   let googleUrl = "https://www.google.com/maps/search/?api=1&query=" + coordsString;
   smsLink.href = "sms://?&body=" + encodeURIComponent(googleUrl);
   smsLink.click();
@@ -412,9 +424,11 @@ settingsExitElement.addEventListener("click", function (event) {
   }
 }
 function displayAd() {
-  let oldAds = Array.from(document.querySelectorAll('.nav-selectable-ad'));
+  let oldAds = [].slice.call(document.querySelectorAll('.nav-selectable-ad'));
   for (let i = 0; i < oldAds.length; i++) {
-    oldAds[i].remove();
+    if (oldAds[i].parentNode) {
+      oldAds[i].parentNode.removeChild(oldAds[i]);
+    }
   }
   getKaiAd({
     publisher: '91b81d86-37cf-4a2f-a895-111efa5b36bb',

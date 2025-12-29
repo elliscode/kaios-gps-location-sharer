@@ -13,7 +13,7 @@
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
 const UI_DOMAIN = 'https://www.dumbphoneapps.com';
-const API_DOMAIN = 'https://gpsv2.dumbphoneapps.com';
+const API_DOMAIN = 'https://gpsv3.dumbphoneapps.com';
 const ID_REGEX = /^[0-9a-zA-Z]{10}$/;
 const characters = '0123456789bcdfjlmpqrstwxzBCDFJLMPQRSTWXZ';
 const toggleElement = document.getElementById('toggle');
@@ -264,7 +264,7 @@ function reportPosition() {
     body: JSON.stringify(payload)
   }).then(response => {
       if (!response.ok && response.status === 429) {
-      showDialog("Sharing stopped", 'Sharing stopped due to too many requests, please try again later.');
+        showDialog("Sharing stopped", 'Sharing stopped due to too many requests, please try again later.');
         stopSharingLocation();
       }
   });
