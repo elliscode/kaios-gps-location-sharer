@@ -1,0 +1,11 @@
+#help-ui p {
+    margin: 0px;
+    padding: 2px 5px;
+}
+#help-ui h3 {
+    background-color: purple;
+    color:white;
+    font-weight:bold;
+    margin: 0px;
+    padding: 2px 5px;
+}

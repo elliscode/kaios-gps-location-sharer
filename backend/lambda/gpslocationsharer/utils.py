@@ -57,8 +57,12 @@ def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
 
 
 def path_equals(event, method, path):
-    event_path = event["path"]
-    event_method = event["httpMethod"]
+    event_path = event.get("path")
+    if not event_path:
+        event_path = event.get("requestContext", {}).get("http", {}).get("path")
+        stage = event.get("requestContext", {}).get("stage")
+        event_path = event_path.removeprefix(f"/{stage}")
+    event_method = event.get("httpMethod", event.get("requestContext", {}).get("http", {}).get("method"))
     return event_method == method and (event_path == path or event_path == path + "/" or path == "*")
 
 
