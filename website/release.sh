@@ -1,0 +1,1 @@
+aws s3 sync . s3://daniel-townsend-kaios-gps-location-sharer --exclude "*.DS_Store" --exclude "*.sh" --delete

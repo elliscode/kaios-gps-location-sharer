@@ -1,18 +1,24 @@
 import json
 import traceback
 
+from gpslocationsharer.logger import log
 from gpslocationsharer.utils import (
     path_equals,
     format_response,
+    has_invalid_domain,
+)
+from gpslocationsharer.location_routes import (
     share_location_route,
+    view_location_route,
+    get_maps_token_route,
 )
 
 
 def lambda_handler(event, context):
     try:
-        print(json.dumps(event.get("headers")))  # Only logging headers, I don't want to log people's GPS location passed in "body"
+        log(json.dumps(event.get("headers")))
         result = route(event)
-        print(result)
+        log(result["statusCode"])
         return result
     except Exception:
         traceback.print_exc()
@@ -26,6 +32,12 @@ def lambda_handler(event, context):
 #
 # see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests
 def route(event):
+    if has_invalid_domain(event=event):
+        format_response(event=event, http_code=403, body={"message": "Forbidden"})
     if path_equals(event=event, method="POST", path="/share"):
         return share_location_route(event)
+    if path_equals(event=event, method="POST", path="/view"):
+        return view_location_route(event)
+    if path_equals(event=event, method="POST", path="/token"):
+        return get_maps_token_route(event)
     return format_response(event=event, http_code=403, body={"message": "Forbidden"})

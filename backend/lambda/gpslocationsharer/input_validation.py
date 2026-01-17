@@ -54,7 +54,7 @@ def validate_schema(value, schema):
                 if not result:
                     return None
                 output.append(result)
-            return output;
+            return output
         if schema["type"] == dict:
             output = {}
             for field in schema["fields"]:
@@ -80,17 +80,50 @@ LOCATION_SHARING_SCHEMA = {
         {"type": validate_id, "name": "id"},
         {"type": validate_decimal, "name": "lat"},
         {"type": validate_decimal, "name": "lon"},
-    ]
+    ],
 }
 
-if __name__ == '__main__':
-    print(is_valid_against_schema({
-        "lat": "40.5123",
-        "lon": "-71.4123",
-        "id": "a5123zZmfs",
-    }, LOCATION_SHARING_SCHEMA))
-    print(is_valid_against_schema({
-        "lat": "40W",
-        "lon": "-71S",
-        "id": "My-id",
-    }, LOCATION_SHARING_SCHEMA))
+LOCATION_VIEWING_SCHEMA = {
+    "type": dict,
+    "fields": [
+        {"type": validate_id, "name": "id"},
+    ],
+}
+
+
+TOKEN_REQUEST_SCHEMA = {
+    "type": dict,
+    "fields": [
+        {"type": validate_id, "name": "id"},
+    ],
+}
+
+if __name__ == "__main__":
+    print(
+        is_valid_against_schema(
+            {
+                "lat": "40.5123",
+                "lon": "-71.4123",
+                "id": "a5123zZmfs",
+            },
+            LOCATION_SHARING_SCHEMA,
+        )
+    )
+    print(
+        is_valid_against_schema(
+            {
+                "lat": "40W",
+                "lon": "-71S",
+                "id": "My-id",
+            },
+            LOCATION_SHARING_SCHEMA,
+        )
+    )
+    print(
+        is_valid_against_schema(
+            {
+                "id": "a5123zZmfs",
+            },
+            LOCATION_VIEWING_SCHEMA,
+        )
+    )

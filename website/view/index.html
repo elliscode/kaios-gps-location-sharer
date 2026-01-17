@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Location Viewer</title>
+    <link rel="icon" type="image/png" href="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
+    <style>
+#info {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: #ccc;
+  z-index: 12;
+  padding: 20px;
+  border-radius: 20px 20px 0px 0px;
+  margin-bottom: 0px;
+}
+#info p {
+  margin: 0px;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 2s, opacity 2s linear;
+}
+.delete {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
+}
+    </style>
+  </head>
+
+  <body>
+    <p style="display:inline-block;margin:0 0 8px 0;" id="json"></p>
+    <button onclick="resumeLocation(event)" id="resume" style="display: none">
+      Resume
+    </button>
+    <div id="info" style="display:none;">
+      <p id="info-p"></p>
+      <button onclick="closeInfoWindow(event)" class="delete">&times;</button>
+    </div>
+
+
+    <div id="map" style="width: 100%; height: calc(100vh - 42px); max-height: calc(100svh - 42x);"></div>
+
+    <div style="display: none" class="logout">
+      <button onclick="logOut(event)">Log out</button>
+    </div>
+
+    <script>
+function getEndOfPath() {
+  return window.location.pathname.split("/").filter(Boolean).at(-1);
+}
+const locationToken = getEndOfPath();
+const json = document.getElementById("json");
+const TIME_LIMIT = 60 * 60;
+const UPDATE_PERIOD_SECONDS = 6;
+const API_DOMAIN = 'https://api.gps.elliscode.com';
+let locationTimeout = undefined;
+
+let resumeButton = document.getElementById("resume");
+
+function resumeLocation(event) {
+  resumeButton.style.display = "none";
+  if (locationTimeout) {
+    return;
+  }
+  previousValues = [];
+  openInfoWindow("Resuming location...");
+  getCurrentLocation();
+}
+
+function getMapsApiKey() {
+  locationTimeout = undefined;
+
+  let url = API_DOMAIN + "/token";
+  let xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("POST", url, true); // false for synchronous request
+  xmlHttp.onload = handleToken;
+  if (!locationToken) {
+    return;
+  }
+  xmlHttp.send(JSON.stringify({ id: locationToken }));
+}
+
+function handleToken(event) {
+  let xmlHttp = event.target;
+
+  if (xmlHttp.status != 200) {
+    json.innerText = "No location found for the token provided";
+  } else {
+    let responseJson = JSON.parse(xmlHttp.responseText);
+    apiKey = responseJson.key;
+    if (window.isES6) {
+      let scriptTag = document.createElement("script");
+      scriptTag.src = "../js/map.js";
+      document.body.appendChild(scriptTag);
+    }
+  }
+}
+
+function getCurrentLocation() {
+  locationTimeout = undefined;
+
+  let url = API_DOMAIN + "/view";
+  let xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("POST", url, true); // false for synchronous request
+  xmlHttp.onload = handleShare;
+  if (!locationToken) {
+    return;
+  }
+  xmlHttp.send(JSON.stringify({ id: locationToken }));
+}
+
+let previousValues = [];
+
+function handleShare(event) {
+  if (locationTimeout) {
+    return;
+  }
+
+  let xmlHttp = event.target;
+
+  if (xmlHttp.status != 200) {
+    json.innerText = "No location found for the token provided";
+  } else {
+    let responseJson = JSON.parse(xmlHttp.responseText);
+    lat = responseJson.lat;
+    lon = responseJson.lon;
+
+    let value = `${lat},${lon}`;
+
+    let timestamp = new Date();
+
+    json.innerHTML =
+      '<a href="https://www.google.com/maps/search/?api=1&query=' +
+      value +
+      '">Click here for directions</a>';
+    // openInfoWindow(`last updated ${timestamp.toLocaleString()}`);
+
+    previousValues.push(value);
+    if (previousValues.length > 10) {
+      previousValues.shift();
+    }
+
+    if (
+      previousValues.length == 10 &&
+      previousValues.every((val) => val === previousValues[0])
+    ) {
+      openInfoWindow("Reported position hasn't changed for the last 60 seconds, assuming the user stopped sharing...", true);
+      resumeButton.style.display = "inline-block";
+      return;
+    }
+
+    locationTimeout = setTimeout(getCurrentLocation, UPDATE_PERIOD_SECONDS * 1000);
+    
+    if (window.isES6) {
+      moveMarker();
+    }
+  }
+}
+let infoWindowCloseTimeout = undefined;
+let infoWindowFadeTimeout = undefined;
+function openInfoWindow(text, disableFade=false) {
+  clearTimeout(infoWindowCloseTimeout);
+  clearTimeout(infoWindowFadeTimeout);
+  let info = document.getElementById("info");
+  if (!info) {
+    console.log("No info div, so you will need to add one to the page you are calling this from");
+    return;
+  }
+  info.classList.remove('fade-out');
+  info.style.display = "block";
+  let infoP = document.getElementById("info-p");
+  infoP.innerText = text;
+  if (!disableFade) {
+    infoWindowCloseTimeout = setTimeout(startInfoWindowFade, 2000);
+  }
+}
+function startInfoWindowFade() {
+  let info = document.getElementById('info');
+  if (info) {
+    info.classList.add('fade-out');
+  }
+  infoWindowFadeTimeout = setTimeout(closeInfoWindow, 2000);
+}
+function closeInfoWindow() {
+  let info = document.getElementById('info');
+  if (info) {
+    info.style.display = 'none';
+    info.classList.remove('fade-out');
+  }
+}
+
+let map;
+let marker;
+let apiKey;
+let lat;
+let lon;
+
+let moveMarker = function () {};
+
+getMapsApiKey();
+getCurrentLocation();
+    </script>
+    <script>
+// checking if the browser has es6 capability, and only then will
+// i run the google map display code. This is for compatibility with
+// KaiOS 2.5.2 and earlier, as the maps code uses ES6 stuff that I
+// cannot remove, see here https://stackoverflow.com/a/64818146
+
+// Arrow functions support
+() => {};
+
+// Class support
+class __ES6FeatureDetectionTest {}
+
+// Object initializer property and method shorthands
+let a = true;
+let b = {
+  a,
+  c() {
+    return true;
+  },
+  d: [1, 2, 3]
+};
+
+// Object destructuring
+let { c, d } = b;
+
+// Spread operator
+let e = [...d, 4];
+
+window.isES6 = true;
+    </script>
+  </body>
+</html>

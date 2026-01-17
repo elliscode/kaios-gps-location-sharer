@@ -1,26 +1,32 @@
 import json
 import os
-import time
-import urllib
+from urllib.parse import parse_qsl
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+from .logger import log
 
-DOMAIN_NAME = os.environ.get("DOMAIN_NAME")
+DOMAIN_NAMES = os.environ.get("DOMAIN_NAMES", "").split(",")
 TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
 dynamo = boto3.client("dynamodb")
 
-from .input_validation import (
-    validate_schema,
-    LOCATION_SHARING_SCHEMA,
-)
+
+def has_invalid_domain(event):
+    return "origin" not in event["headers"] or event["headers"]["origin"].rstrip("/") not in DOMAIN_NAMES
 
 
-def format_response(event, http_code, body, headers=None):
+def format_response(event, http_code, body, headers=None, log_this=True):
     if isinstance(body, str):
         body = {"message": body}
-    domain_name = "*"
+    if "origin" in event["headers"] and event["headers"]["origin"].rstrip("/") in DOMAIN_NAMES:
+        domain_name = event["headers"]["origin"]
+    else:
+        log(f'Invalid origin {event["headers"].get("origin")}')
+        http_code = 403
+        body = {"message": "Forbidden"}
+        domain_name = "*"
     all_headers = {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Origin": domain_name,
@@ -30,6 +36,10 @@ def format_response(event, http_code, body, headers=None):
     }
     if headers is not None:
         all_headers.update(headers)
+    if log_this:
+        log(
+            body,
+        )
     return {
         "statusCode": http_code,
         "body": json.dumps(body),
@@ -42,8 +52,7 @@ def parse_body(body):
         return body
     elif body.startswith("{"):
         return json.loads(body)
-    else:
-        return dict(urllib.parse.parse_qsl(body))
+    return dict(parse_qsl(body))
 
 
 def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
@@ -65,31 +74,3 @@ def path_equals(event, method, path):
     event_method = event.get("httpMethod", event.get("requestContext", {}).get("http", {}).get("method"))
     return event_method == method and (event_path == path or event_path == path + "/" or path == "*")
 
-
-def share_location_route(event):
-    body = validate_schema(parse_body(event["body"]), LOCATION_SHARING_SCHEMA)
-    if not body:
-        return format_response(
-            event=event,
-            http_code=403,
-            body={"message": "Forbidden"},
-        )
-
-    dynamo.put_item(
-        TableName=TABLE_NAME,
-        Item=python_obj_to_dynamo_obj(
-            {
-                "key1": "location",
-                "key2": str(body["id"]),
-                "lat": str(body["lat"]),
-                "lon": str(body["lon"]),
-                "expiration": int(time.time()) + (60 * 60),
-            }
-        ),
-    )
-
-    return format_response(
-        event=event,
-        http_code=200,
-        body=body["id"],
-    )
