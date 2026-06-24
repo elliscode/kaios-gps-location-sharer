@@ -12,8 +12,8 @@
 // navigator.geolocation.clearWatch = function (x) { clearInterval(x); }
 
 const LOCAL_STORAGE_ID = 'gps-location-sharer-unique-id';
-const UI_DOMAIN = 'https://www.dumbphoneapps.com';
-const API_DOMAIN = 'https://gpsv3.dumbphoneapps.com';
+const UI_DOMAIN = 'https://gps.elliscode.com';
+const API_DOMAIN = 'https://api.gps.elliscode.com';
 const ID_REGEX = /^[0-9a-zA-Z]{10}$/;
 const characters = '0123456789bcdfjlmpqrstwxzBCDFJLMPQRSTWXZ';
 const toggleElement = document.getElementById('toggle');
@@ -309,7 +309,7 @@ function sendMapsLinkSms(event) {
 function sendLiveLinkSms(event) {
   let localStorageData = getLocalStorage();
   const smsLink = document.createElement('a');
-  smsLink.href = "sms://?&body=" + encodeURIComponent("I'm sharing my location: " + UI_DOMAIN.substring(8) + "/lv/?id=" + localStorageData.id);
+  smsLink.href = "sms://?&body=" + encodeURIComponent("I'm sharing my location: " + UI_DOMAIN.substring(8) + "/view/" + localStorageData.id);
   smsLink.click();
 }
 function showHelp(event) {
